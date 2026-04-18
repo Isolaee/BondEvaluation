@@ -1,33 +1,61 @@
-# Bond Evaluation Guide
+# Bond Evaluation
 
-## Introduction
-Evaluating the price of bonds and other financial instruments is crucial for investors seeking to understand the potential returns of their investments. This guide outlines the fundamental concepts and methods used in bond pricing and evaluation.
+## Overview
+A Python tool for pricing a 10-year German government bond using real yield curve data. Computes the Net Present Value (NPV) of cash flows by applying annually averaged yields extracted from Nelson-Siegel-Svensson beta scenarios, then compares that against a flat-yield baseline.
 
-## What is a Bond?
-A bond is a fixed income instrument that represents a loan made by an investor to a borrower (typically corporate or governmental). 
+## Problem It Solves
+- Manual bond pricing with a flat discount rate ignores the shape of the actual yield curve, leading to inaccurate valuations
+- Processing raw yield curve CSV data from sources like the ECB into usable per-year discount rates requires non-trivial data wrangling
+- Target users: finance students and analysts who want to experiment with yield-curve-based bond pricing in Python
 
-## Key Concepts
-- **Face Value**: The amount the bond will be worth at maturity.
-- **Coupon Rate**: The interest rate the bond issuer pays to bondholders.
-- **Maturity Date**: The date on which the bond will expire and the issuer will pay back the face value.
-- **Yield to Maturity (YTM)**: The total return expected on a bond if held until maturity.
+## Use Cases
+1. A student prices a 2.6% coupon bond against ECB yield curve data to see how the term structure affects valuation compared to using a single flat yield
+2. An analyst swaps in a different `beta_scenarios_*.csv` file to price the same bond under alternative interest rate scenarios (e.g. stress tests)
+3. A researcher extends `main.py` to loop over multiple bonds and output a comparison table of NPVs across yield curve scenarios
 
-## Methods of Evaluating Bonds
-1. **Present Value of Cash Flows**: Bonds can be priced by discounting the expected cash flows (coupons and face value) to present value. 
-   
-   The formula is:  
-   PV = C / (1+r)^t + FV / (1+r)^T  
-   Where:  
-   - PV = Present Value
-   - C = Coupon payment
-   - r = yield (interest rate)
-   - t = number of periods until payment
-   - FV = Face Value
-   - T = total number of periods
+## Key Features
+- **Yield curve integration** — reads Nelson-Siegel-Svensson beta parameters from CSV and averages per maturity year
+- **Scenario files** — four pre-built scenarios (`IF`, `PY`, `SR`, baseline) for different rate environments
+- **Flat-yield fallback** — if a year's data is missing, the calculation falls back to a hardcoded flat yield
+- **Minimal dependencies** — only `pandas` required
 
-2. **Yield Analysis**: Assess the bond’s yield compared to prevailing interest rates to gauge its attractiveness.
+## Tech Stack
+- Python 3.8+
+- pandas
 
-3. **Credit Risk Assessment**: Evaluate the credit risk associated with the bond issuer. This includes reviewing the issuer's credit rating, financial health, and market position.
+## Getting Started
 
-## Conclusion
-Understanding bond pricing and the factors influencing it is key to making informed investment decisions. This guide serves as a foundational reference for evaluating bonds and integrating these evaluations into overall investment strategies.
+```bash
+# 1. Clone the repo
+git clone https://github.com/Isolaee/BondEvaluation.git
+cd BondEvaluation
+
+# 2. Install dependencies
+pip install pandas
+
+# 3. Run the pricing script
+python code/main.py
+```
+
+Output prints the per-year average yields and the NPV of the bond under those yields.
+
+### Customising the bond
+
+Edit the parameters at the top of `code/main.py`:
+
+```python
+coupon      = 2.6    # annual coupon rate (%)
+yield_rate  = 2.71   # fallback flat yield (%)
+face_value  = 100    # par value
+```
+
+### Switching yield curve scenarios
+
+Change the file loaded in `main.py` to one of the other scenario files:
+
+| File | Description |
+|---|---|
+| `beta_scenarios_IF.csv` | Instantaneous forward rate scenario |
+| `beta_scenarios_PY.csv` | Par yield scenario |
+| `beta_scenarios_SR.csv` | Spot rate scenario |
+| `beta_scenarios.csv` | Baseline |
